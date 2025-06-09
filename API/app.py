@@ -27,13 +27,14 @@ def inserir(face: FaceEntrada): #Mudanca atuaalizar elementos de treg, funcoes r
     lib.inserir_face(nova_face)
     return {"mensagem": f"Face: '{face.id}' inserida com sucesso."}
 
-@app.get("/buscar") #Atualizar elementos de treg
-def buscar(emb: list[float] = Query(...)):
-    emb_vetor = (c_float * 128)(emb)
-    query = TReg(emb = emb_vetor)
+@app.post("/buscar") #Atualizar elementos de treg
+def buscar(face: FaceEntrada):
+    emb_vetor = (c_float * 128)(*face.emb)
+    id_bytes = face.id.encode('utf-8')[:99]  # Trunca se necessário
+    face_atual = TReg(emb=emb_vetor, id=id_bytes)
 
     arv = lib.get_tree()  # Suponha que esta função retorne ponteiro para árvore já construída
-    resultado = lib.buscar_mais_proximo(arv, query)
+    resultado = lib.buscar_mais_proximo(arv, face_atual)
 
     return { #Mudanca atualizar retorno de dados
         "emb": list(resultado.emb), 
